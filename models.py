@@ -6,7 +6,7 @@ class Note(db.Model):
     __tablename__ = "notes"
     id = db.Column("notes_id", db.Integer(), autoincrement=True, primary_key=True)
     def __init__(self):
-        self.content = db.Column(db.Text())
+        self.text = db.Column(db.Text())
         self.date_added = db.Column(db.DateTime())
         self.following = db.Column(db.Integer())
         self.audio_id = db.Column(db.Integer())
