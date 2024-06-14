@@ -4,19 +4,26 @@ db = SQLAlchemy()
 
 class Note(db.Model):
     __tablename__ = "notes"
-    id = db.Column("notes_id", db.Integer(), autoincrement=True, primary_key=True)
-    def __init__(self):
-        self.text = db.Column(db.Text())
-        self.date_added = db.Column(db.DateTime())
-        self.following = db.Column(db.Integer())
-        self.audio_id = db.Column(db.Integer())
-        self.todo = db.Column(db.Boolean())
+    note_id = db.Column("note_id", db.Integer(), autoincrement=True, primary_key=True)
+    text = db.Column(db.Text())
+    date_added = db.Column(db.DateTime())
+    following = db.Column(db.Integer(), nullable=True)
+    audio_id = db.Column(db.Integer(), nullable=True)
+    todo = db.Column(db.Boolean())
+    def __init__(self, text, date_added, following=None, audio_id=None, todo=False):
+        self.text = text
+        self.date_added = date_added
+        self.following = following
+        self.audio_id = audio_id
+        self.todo = todo
 
 class AudioRecording(db.Model):
     __tablename__ = "audio_recordings"
     id = db.Column("audio_id", db.Integer(), autoincrement=True, primary_key=True)
+    file_url = db.Column(db.UnicodeText())
+    transcribed = db.Column(db.Boolean())
 
     def __init__(self):
-        self.file_url = db.Column(db.UnicodeText())
-        self.transcribed = db.Column(db.Boolean())
+        self.file_url = file_url
+        self.transcribed = transcribed
 
