@@ -1,10 +1,25 @@
 from flask import Flask, render_template, request, redirect, jsonify
+from flask.logging import default_handler
 from models import db, Note, AudioRecording
 import sys
 import datetime
+import logging
+
+logger = logging.getLogger('werkzeug')
+log_formatter = logging.Formatter("%(asctime)s %(levelname)s:%(message)s")
+logger.setLevel(logging.DEBUG)
+
+log_file_handler = logging.FileHandler("example.log")
+log_file_handler.setFormatter(log_formatter)
+logger.addHandler(log_file_handler)
+
+log_stream_handler = logging.StreamHandler(sys.stdout)
+log_stream_handler.setFormatter(log_formatter)
+logger.addHandler(log_stream_handler)
 
 app = Flask(__name__)
- 
+app.logger.removeHandler(default_handler)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///obsidian-audio-capture.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
@@ -32,7 +47,19 @@ def note():
             # return new note id
             new_note = Note.query.order_by(Note.note_id.desc()).first()
 
-        return {"new_note_id": new_note.note_id}
+            return {"new_note_id": new_note.note_id}
+
+        elif request_json["audio"] :
+            print("yo")
+            # download audio file 
+            # add audio file to database
+            # try to transcript the audio file
+            # update the audio file database
+            # add the transcript to the note database if succeeded
+            # return id of note if succeeded
+            # else return id of audio
+
+        return "Invalid payload ", 400
 
     elif request.method == 'GET':
         all_notes = Note.query.all()
