@@ -28,16 +28,18 @@ db.init_app(app)
 def hello_world():
     return "<p>Hello, World!</p>"
 
-@app.route("/note", methods = ['POST', 'GET'])
-def note():
+@app.route("/capture", methods = ['POST', 'GET'])
+def capture():
     if request.method == 'POST':
         request_json = request.json
-        if request_json["text"] :
+        capture_type = request_json.get("capture_type")
+        if capture_type == "note" :
+            note_data = request.json.get("data")
             # check if sent note is a todo, fallback to false
-            todo = request_json.get("todo") or False
+            todo = note_data.get("todo") or False
             
             note = Note(
-                text=request_json["text"], 
+                text=note_data["text"], 
                 date_added=datetime.datetime.now(), 
                 todo=todo
             )
@@ -49,7 +51,7 @@ def note():
 
             return {"new_note_id": new_note.note_id}
 
-        elif request_json["audio"] :
+        elif capture_type == "audio" :
             print("yo")
             # download audio file 
             # add audio file to database
