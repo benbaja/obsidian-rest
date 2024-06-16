@@ -7,11 +7,14 @@ import datetime
 import logging
 import base64
 
+# setup logger to write to file
 logger = logging.getLogger('werkzeug')
 log_formatter = logging.Formatter("%(asctime)s %(levelname)s:%(message)s")
 logger.setLevel(logging.DEBUG)
 
-log_file_handler = logging.FileHandler("example.log")
+Path("logs").mkdir(parents=False, exist_ok=True)
+log_file_path = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log"
+log_file_handler = logging.FileHandler(log_file_path)
 log_file_handler.setFormatter(log_formatter)
 logger.addHandler(log_file_handler)
 
