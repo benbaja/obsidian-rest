@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, jsonify
 from flask.logging import default_handler
 from models import db, Note, AudioRecording
-from swiftink import get_transcript
+from swiftink import Swiftink
 import sys
 from pathlib import Path
 import datetime
@@ -67,24 +67,36 @@ def capture():
             with open(file_path,"wb") as file:
                 file.write(audio_file)
             # add audio file to database
-            db.session.add(
-                AudioRecording(
+            new_audio = AudioRecording(
                     file_name=capture_data.get("file_name"), 
-                    date_added=datetime.datetime.now())
+                    date_added=datetime.datetime.now()
             )
-            db.session.commit()
+            db.session.add(new_audio)
+            db.session.flush()
+            db.session.refresh(new_audio)
+
             # try to transcript the audio file
-            transcription_result = get_transcript(capture_data.get("file_name"), logger)
-            if transcription_result :
+            transcription_result = Swiftink(file_path, logger)
+            if transcription_result.text :
                 # check length of note and split if > 50kb
                 # add the transcript to the note database if succeeded
+                db.session.add(
+                    Note(
+                        text=transcription_result.text, 
+                        date_added=datetime.datetime.now(), 
+                        audio_id=new_audio.audio_id
+                ))
                 # update the audio file database
+                new_audio.transcript_id = transcription_result.id
+                db.session.add(new_audio)
+                db.session.commit()
                 # return id of note if succeeded
-                return "OK", 200
+                new_note = Note.query.order_by(Note.note_id.desc()).first()
+                return {"new_note_id": new_note.note_id}
+
             else :
-                # update the audio file database
-                # else return id of audio
-                return "Not OK", 200
+                # return id of audio
+                return {"new_audio_id": new_audio.audio_id}
 
         return "Invalid payload ", 400
 

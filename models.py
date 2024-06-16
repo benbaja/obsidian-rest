@@ -19,15 +19,13 @@ class Note(db.Model):
 
 class AudioRecording(db.Model):
     __tablename__ = "audio_recordings"
-    id = db.Column("audio_id", db.Integer(), autoincrement=True, primary_key=True)
+    audio_id = db.Column("audio_id", db.Integer(), autoincrement=True, primary_key=True)
     file_name = db.Column(db.UnicodeText())
     transcript_id = db.Column(db.UnicodeText())
-    transcribed = db.Column(db.Boolean())
     date_added = db.Column(db.DateTime())
 
-    def __init__(self, file_name, date_added, transcript_id=None, transcribed=None):
+    def __init__(self, file_name, date_added, transcript_id=None):
         self.transcript_id = transcript_id
         self.file_name = file_name
-        self.transcribed = transcribed
         self.date_added = date_added
 
