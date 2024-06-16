@@ -2,8 +2,10 @@ from flask import Flask, render_template, request, redirect, jsonify
 from flask.logging import default_handler
 from models import db, Note, AudioRecording
 import sys
+from pathlib import Path
 import datetime
 import logging
+import base64
 
 logger = logging.getLogger('werkzeug')
 log_formatter = logging.Formatter("%(asctime)s %(levelname)s:%(message)s")
@@ -33,13 +35,13 @@ def capture():
     if request.method == 'POST':
         request_json = request.json
         capture_type = request_json.get("capture_type")
+        capture_data = request.json.get("data")
         if capture_type == "note" :
-            note_data = request.json.get("data")
             # check if sent note is a todo, fallback to false
-            todo = note_data.get("todo") or False
+            todo = capture_data.get("todo") or False
             
             note = Note(
-                text=note_data["text"], 
+                text=capture_data["text"], 
                 date_added=datetime.datetime.now(), 
                 todo=todo
             )
@@ -52,8 +54,14 @@ def capture():
             return {"new_note_id": new_note.note_id}
 
         elif capture_type == "audio" :
-            print("yo")
+            audio_file = base64.b64decode(capture_data.get("audio"))
+            file_path = "audio_captures/" + capture_data.get("file_name")
+            # create audio capture folder if it doesn't exist
+            Path("audio_captures").mkdir(parents=False, exist_ok=True)
+
             # download audio file 
+            with open(file_path,"wb") as file:
+                file.write(audio_file)
             # add audio file to database
             # try to transcript the audio file
             # update the audio file database
