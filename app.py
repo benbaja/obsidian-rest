@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, jsonify
 from flask.logging import default_handler
 from models import db, Note, AudioRecording
+from swiftink import get_transcript
 import sys
 from pathlib import Path
 import datetime
@@ -42,13 +43,13 @@ def capture():
         if capture_type == "note" :
             # check if sent note is a todo, fallback to false
             todo = capture_data.get("todo") or False
-            
-            note = Note(
-                text=capture_data["text"], 
-                date_added=datetime.datetime.now(), 
-                todo=todo
-            )
-            db.session.add(note)
+
+            db.session.add(
+                Note(
+                    text=capture_data["text"], 
+                    date_added=datetime.datetime.now(), 
+                    todo=todo
+            ))
             db.session.commit()
 
             # return new note id
@@ -66,11 +67,24 @@ def capture():
             with open(file_path,"wb") as file:
                 file.write(audio_file)
             # add audio file to database
+            db.session.add(
+                AudioRecording(
+                    file_name=capture_data.get("file_name"), 
+                    date_added=datetime.datetime.now())
+            )
+            db.session.commit()
             # try to transcript the audio file
-            # update the audio file database
-            # add the transcript to the note database if succeeded
-            # return id of note if succeeded
-            # else return id of audio
+            transcription_result = get_transcript(capture_data.get("file_name"), logger)
+            if transcription_result :
+                # check length of note and split if > 50kb
+                # add the transcript to the note database if succeeded
+                # update the audio file database
+                # return id of note if succeeded
+                return "OK", 200
+            else :
+                # update the audio file database
+                # else return id of audio
+                return "Not OK", 200
 
         return "Invalid payload ", 400
 
