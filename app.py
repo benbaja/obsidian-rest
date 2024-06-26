@@ -46,8 +46,7 @@ def capture():
         capture_data = request.json.get("data")
         if capture_type == "note" :
             # check if sent note is a todo, fallback to false
-            todo = capture_data.get("todo") or False
-
+            todo = request_json.get("todo") or False
             db.session.add(
                 Note(
                     text=capture_data["text"], 
