@@ -39,7 +39,7 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 @app.route("/capture/create", methods = ['POST'])
-def capture():
+def capture_create():
     request_json = request.json
     capture_type = request_json.get("capture_type")
     capture_data = request.json.get("data")
@@ -102,16 +102,26 @@ def capture():
 
     return "Invalid payload ", 400
 
+@app.route("/capture/update", methods = ['POST'])
+def capture_update():
+    to_update_list = request.json['captureIDs']
+    
+    db.session.query(Note).filter(Note.note_id.in_(to_update_list)).update({'fetched': True})
+    db.session.commit()
+
+    return to_update_list
+
 @app.route("/capture", methods = ['GET'])
 def capture_fetch():
-    all_notes = Note.query.all()
+    all_notes = db.session.query(Note).filter_by(fetched=False)
     all_notes_json = [
         {
             "text": note.text,
             "date_added": note.date_added,
             "todo": note.todo,
             "following": note.following,
-            "audio_id": note.audio_id
+            "audio_id": note.audio_id,
+            "capture_id": note.note_id
         } for note in all_notes
     ]
     return all_notes_json

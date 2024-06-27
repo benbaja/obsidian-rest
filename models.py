@@ -10,12 +10,15 @@ class Note(db.Model):
     following = db.Column(db.Integer(), nullable=True)
     audio_id = db.Column(db.Integer(), nullable=True)
     todo = db.Column(db.Boolean())
-    def __init__(self, text, date_added, following=None, audio_id=None, todo=False):
+    fetched = db.Column(db.Boolean(), default=False)
+
+    def __init__(self, text, date_added, following=None, audio_id=None, todo=False, fetched=False):
         self.text = text
         self.date_added = date_added
         self.following = following
         self.audio_id = audio_id
         self.todo = todo
+        self.fetched = fetched
 
 class AudioRecording(db.Model):
     __tablename__ = "audio_recordings"
