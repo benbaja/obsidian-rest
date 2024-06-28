@@ -1,0 +1,54 @@
+<!doctype html>
+    <head>
+        {% block head %}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <style type="text/css">
+            .custom-container {
+              margin: 5%;
+              padding: 3%;
+              border: 1px solid black;
+              border-radius:.75rem!important;
+              background-color: white;
+              min-height: 80vh;
+            }
+            body {
+                background-color: black!important;
+            }
+        </style>
+
+        {{ bootstrap.load_css() }}
+        {% endblock %}
+    </head>
+    <body>
+        <div class="custom-container">
+        <nav class="nav nav-tabs">
+              <a class="navbar-brand" href="#">Obsidian Audio Capture</a>
+              <ul class="nav nav-tabs">
+                  <li class="nav-item">
+                    <a class="nav-link {{ 'active' if active == 'home' }} {{ 'disabled' if not logged_in }}" aria-current="page" href="/">Home</a>
+                  </li>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle {{ 'active' if active in ['captures', 'audio'] }} {{ 'disabled' if not logged_in }}" data-bs-toggle="dropdown" role="button" aria-expanded="false">Browse</a>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item {{ 'active' if active == 'captures' }}" href="#">Captures</a></li>
+                      <li><a class="dropdown-item {{ 'active' if active == 'audio' }}" href="#">Audio</a></li>
+                    </ul>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link {{ 'active' if active == 'settings' }} {{ 'disabled' if not logged_in }}" href="#">Settings</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link {{ 'active' if active == 'logs' }} {{ 'disabled' if not logged_in }}" aria-disabled="true">Logs</a>
+                  </li>
+                </ul>
+        </nav>
+        {% block content %}
+        {% endblock%}
+        </div>
+        
+
+        {{ bootstrap.load_js() }}
+    </body>
+</html>

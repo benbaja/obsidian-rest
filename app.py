@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, jsonify
 from flask.logging import default_handler
 from flask_cors import CORS
+from flask_bootstrap import Bootstrap5
 from models import db, Note, AudioRecording
 from swiftink import Swiftink
 import sys
@@ -31,12 +32,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///obsidian-audio-capture.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
+bootstrap = Bootstrap5(app)
+
 # authorize cross-origin AJAX for Obsidian
 CORS(app)
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return render_template("home.html", bootstrap=bootstrap)
 
 @app.route("/capture/create", methods = ['POST'])
 def capture_create():
