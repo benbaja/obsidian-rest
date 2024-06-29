@@ -49,7 +49,7 @@ def generate_api_key(password):
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.args.get('token')
+        token = request.headers.get("Authorization")
         if token :
             try :
                 decoded_token = jwt.decode(jwt=token, key=app.secret_key, algorithms=['HS256'])
