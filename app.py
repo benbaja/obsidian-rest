@@ -3,6 +3,7 @@ from flask.logging import default_handler
 from flask_cors import CORS
 from flask_bootstrap import Bootstrap5
 from pathlib import Path
+from functools import wraps
 from uuid import uuid4
 from models import db, Note, AudioRecording, Users
 from swiftink import Swiftink
@@ -44,6 +45,26 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 def generate_api_key(password):
     return jwt.encode({'password': password, 'uuid': str(uuid4())}, app.secret_key)
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.args.get('token')
+        if token :
+            try :
+                decoded_token = jwt.decode(jwt=token, key=app.secret_key, algorithms=['HS256'])
+            except :
+                return jsonify({'message': 'Invalid token'}), 403
+            user = db.session.query(Users).first()
+            
+            if decoded_token.get("password") == user.password :
+                return f(*args, **kwargs)
+            else :
+                return jsonify({'message': 'Invalid token'}), 403
+        else :
+            return jsonify({'message': 'Missing token'}), 403
+    return decorated
+
 
 @app.route("/")
 def home():
@@ -152,6 +173,7 @@ def change_settings():
         return redirect("/")
 
 @app.route("/capture/create", methods = ['POST'])
+@token_required
 def capture_create():
     request_json = request.json
     capture_type = request_json.get("capture_type")
@@ -216,6 +238,7 @@ def capture_create():
     return "Invalid payload ", 400
 
 @app.route("/capture/update", methods = ['POST'])
+@token_required
 def capture_update():
     to_update_list = request.json['captureIDs']
     
@@ -225,6 +248,7 @@ def capture_update():
     return to_update_list
 
 @app.route("/capture", methods = ['GET'])
+@token_required
 def capture_fetch():
     all_notes = db.session.query(Note).filter_by(fetched=False)
     all_notes_json = [
@@ -240,6 +264,7 @@ def capture_fetch():
     return all_notes_json
 
 @app.route("/capture/<id>", methods = ['GET'])
+@token_required
 def note_id(id):
     note = Note.query.filter_by(note_id=id).first()
     note_json = {
