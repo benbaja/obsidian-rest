@@ -99,9 +99,11 @@ def register():
         db.session.commit()
 
         session["logged_in"] = True
+        session["settings_message"] = "Please copy your API key and input your swiftink key"
+        return redirect('/settings')
     else :
         session["home_message"] = "The passwords did not match"
-    return redirect('/')
+        return redirect('/')
 
 @app.route("/settings", methods = ['GET'])
 def settings():
@@ -122,25 +124,25 @@ def change_settings():
         user = db.session.query(Users).first()
         message = ""
 
-        if request.form.get('new_password') :
-            if request.form.get('new_password') == request.form.get('new_password_confirm') :
-                if request.form.get('old_password') == user.password :
-                    user.password = request.form.get('new_password')
+        if request.form.get('new-password') :
+            print("yae")
+            if request.form.get('new-password') == request.form.get('new-password-confirm') :
+                if request.form.get('old-password') == user.password :
+                    user.password = request.form.get('new-password')
                     message += "Successfully changed password. "
                 else :
                     message += "Invalid password"
-                    pass
             else :
                 message += "Passwords did not match. "
-                pass
+
         if request.form.get('api_key') :
             user.api_key = generate_api_key(user.password)
             message += "Generated new API key. "
+
         if request.form.get('swiftink_key') :
             user.swiftink_api = request.form.get('swiftink_key')
             message += "Saved Swiftink API key. "
 
-        #save db
         db.session.commit()
         db.session.flush()
 

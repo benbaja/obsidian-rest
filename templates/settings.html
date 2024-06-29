@@ -25,7 +25,9 @@
         <button class="btn btn-primary" type="button" id="api_key_copy">Copy</button>
         <button class="btn btn-danger" type="submit" data-bs-toggle="modal" data-bs-target="#resetModal">Regenerate API key</button>
     </form>
+
     <br>
+
     <form action="{{ url_for('change_settings')}}" enctype="application/x-www-form-urlencoded" method="POST">
         <div class="input-group mb-3">
             <label class="form-label" labelfor="swiftink_input">Swiftink API Key</label>
@@ -38,6 +40,26 @@
         </div>
         <button class="btn btn-primary" type="submit">Save</button>
         <button class="btn btn-danger" type="test" data-bs-toggle="modal" data-bs-target="#resetModal">Test</button>
+    </form>
+
+    <br>
+
+    <form action="{{ url_for('change_settings')}}" enctype="application/x-www-form-urlencoded" method="POST">
+            <label class="form-label" labelfor="old-password">Change Password</label>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="old-password-span" style="width:12em">Old password</span>
+            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="old-password" id="old-password">
+        </div>
+        <br>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="new-password-span" style="width:12em">New password</span>
+            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="new-password">
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="newpassword-confirm-span" style="width:12em">Confirm new password</span>
+            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="new-password-confirm">
+        </div>
+        <button class="btn btn-primary" type="submit">Change password</button>
     </form>
 
     <script type="text/javascript" blocking="render">
