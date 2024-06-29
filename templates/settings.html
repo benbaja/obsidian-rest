@@ -14,7 +14,7 @@
     
     <form action="{{ url_for('change_settings')}}" enctype="application/x-www-form-urlencoded" method="POST">
         <div class="input-group mb-3">
-            <label class="form-label" labelfor="api_input">API Key</label>
+            <label class="form-label" labelfor="api_input">API Token</label>
             <div class="input-group">
                 <input type="password" class="form-control" aria-label="api key" id="api_input" name="api_key" readonly="True" value="{{ api_key }}">
                 <span class="input-group-text" id="show_hide_api">
@@ -30,7 +30,7 @@
 
     <form action="{{ url_for('change_settings')}}" enctype="application/x-www-form-urlencoded" method="POST">
         <div class="input-group mb-3">
-            <label class="form-label" labelfor="swiftink_input">Swiftink API Key</label>
+            <label class="form-label" labelfor="swiftink_input">Swiftink API Token</label>
             <div class="input-group">
                 <input type="password" class="form-control" aria-label="swiftink key" id="swiftink_input" name="swiftink_key" value="{{ swiftink_key }}">
                 <span class="input-group-text" id="show_hide_swiftink">
@@ -45,7 +45,7 @@
     <br>
 
     <form action="{{ url_for('change_settings')}}" enctype="application/x-www-form-urlencoded" method="POST">
-            <label class="form-label" labelfor="old-password">Change Password</label>
+            <label class="form-label" labelfor="old-password">Change Password (this will also regenerate your token)</label>
         <div class="input-group mb-3">
             <span class="input-group-text" id="old-password-span" style="width:12em">Old password</span>
             <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="old-password" id="old-password">

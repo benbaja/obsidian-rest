@@ -44,7 +44,7 @@ CORS(app)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 def generate_api_key(password):
-    return jwt.encode({'password': password, 'uuid': str(uuid4())}, app.secret_key)
+    return jwt.encode(payload={'password': password, 'uuid': str(uuid4())}, key=app.secret_key, algorithm="HS256")
 
 def token_required(f):
     @wraps(f)
@@ -56,7 +56,7 @@ def token_required(f):
             except :
                 return jsonify({'message': 'Invalid token'}), 403
             user = db.session.query(Users).first()
-            
+
             if decoded_token.get("password") == user.password :
                 return f(*args, **kwargs)
             else :
@@ -146,10 +146,10 @@ def change_settings():
         message = ""
 
         if request.form.get('new-password') :
-            print("yae")
             if request.form.get('new-password') == request.form.get('new-password-confirm') :
                 if request.form.get('old-password') == user.password :
                     user.password = request.form.get('new-password')
+                    user.api_key = generate_api_key(request.form.get('new-password'))
                     message += "Successfully changed password. "
                 else :
                     message += "Invalid password"
