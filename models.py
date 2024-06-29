@@ -32,3 +32,14 @@ class AudioRecording(db.Model):
         self.file_name = file_name
         self.date_added = date_added
 
+class Users(db.Model):
+    __tablename__ = "users"
+    user_id = db.Column(db.Integer(), autoincrement=True, primary_key=True)
+    password = db.Column(db.Text())
+    api_key = db.Column(db.UnicodeText())
+    date_created = db.Column(db.DateTime())
+
+    def __init__(self, password, api_key, date_created):
+        self.password = password
+        self.api_key = api_key
+        self.date_created = date_created

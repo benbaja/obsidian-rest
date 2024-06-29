@@ -1,10 +1,41 @@
 {% extends 'base.html' %}
-{% set active = 'audio' %}
-{% set logged_in = False %}
+{% set active = 'home' %}
 
 {% block head %}
 {{ super() }}
 {% endblock%}
 
 {% block content %}
+{% if logged_in %}
+
+{% else %}
+    {% if message %}
+    <div class="alert alert-info" role="alert">
+        {{ message }}
+    </div>
+    {% endif %}
+    
+    {% if registered %}
+    <form>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="password-span">Password</span>
+            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span">
+        </div>
+    </form>
+
+    {% else %}
+    <form action="{{ url_for('register')}}" enctype="application/x-www-form-urlencoded" method="POST">
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="password-span" style="width:10em">Password</span>
+            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="password">
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="password-span" style="width:10em">Confirm password</span>
+            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="password-confirm">
+        </div>
+        <button class="btn btn-primary" type="submit">Register</button>
+    </form>
+    {% endif %}
+{% endif %}
+
 {% endblock%}

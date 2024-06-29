@@ -1,11 +1,13 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, session, url_for
 from flask.logging import default_handler
 from flask_cors import CORS
 from flask_bootstrap import Bootstrap5
-from models import db, Note, AudioRecording
-from swiftink import Swiftink
-import sys
 from pathlib import Path
+from models import db, Note, AudioRecording, Users
+from swiftink import Swiftink
+import os
+import sys
+import jwt
 import datetime
 import logging
 import base64
@@ -37,9 +39,36 @@ bootstrap = Bootstrap5(app)
 # authorize cross-origin AJAX for Obsidian
 CORS(app)
 
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
+
 @app.route("/")
 def hello_world():
-    return render_template("home.html", bootstrap=bootstrap)
+    if session.get('logged_in') == True :
+        return render_template("home.html", bootstrap=bootstrap, logged_in=True)
+    else :
+        return render_template("home.html", bootstrap=bootstrap, logged_in=False, message="Please set up your admin password")
+
+@app.route("/login", methods = ['POST'])
+def login():
+    print(request.form)
+    return redirect('/')
+
+@app.route("/register", methods = ['POST'])
+def register():
+    if request.form.get('password') == request.form.get('password-confirm') :
+        api_key = jwt.encode({'password': request.form.get('password')}, app.secret_key)
+        new_user = Users(
+            password = request.form.get('password'),
+            api_key = api_key,
+            date_created = datetime.datetime.now())
+        db.session.add(new_user)
+        db.session.commit()
+
+        session["logged_in"] = True
+        return redirect('/')
+    else :
+        return render_template("home.html", bootstrap=bootstrap, logged_in=False, message="The passwords did not match")
+
 
 @app.route("/capture/create", methods = ['POST'])
 def capture_create():
