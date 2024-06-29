@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% set active = 'settings' %}
+
+{% block head %}
+{{ super() }}
+{% endblock%}
+
+{% block content %}
+    {% if message %}
+    <div class="alert alert-info" role="alert">
+        {{ message }}
+    </div>
+    {% endif %}
+    
+    <form action="{{ url_for('change_settings')}}" enctype="application/x-www-form-urlencoded" method="POST">
+        <div class="input-group mb-3">
+            <label class="form-label" labelfor="api_input">API Key</label>
+            <div class="input-group">
+                <input type="password" class="form-control" aria-label="api key" id="api_input" name="api_key" readonly="True" value="{{ api_key }}">
+                <span class="input-group-text" id="show_hide_api">
+                    <i class="bi bi-eye-slash" aria-hidden="true" id="api_eyei"></i>
+                </span>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="button" id="api_key_copy">Copy</button>
+        <button class="btn btn-danger" type="submit" data-bs-toggle="modal" data-bs-target="#resetModal">Regenerate API key</button>
+    </form>
+    <br>
+    <form action="{{ url_for('change_settings')}}" enctype="application/x-www-form-urlencoded" method="POST">
+        <div class="input-group mb-3">
+            <label class="form-label" labelfor="swiftink_input">Swiftink API Key</label>
+            <div class="input-group">
+                <input type="password" class="form-control" aria-label="swiftink key" id="swiftink_input" name="swiftink_key" value="{{ swiftink_key }}">
+                <span class="input-group-text" id="show_hide_swiftink">
+                    <i class="bi bi-eye-slash" aria-hidden="true" id="swiftink_eyei"></i>
+                </span>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Save</button>
+        <button class="btn btn-danger" type="test" data-bs-toggle="modal" data-bs-target="#resetModal">Test</button>
+    </form>
+
+    <script type="text/javascript" blocking="render">
+        const showHideAPI = document.getElementById("show_hide_api");
+        const showHideSwiftInk = document.getElementById("show_hide_swiftink");
+        const copyBtn = document.getElementById("api_key_copy");
+        
+        const toggleEye = (source) => {
+            if (document.getElementById(source + "_input").getAttribute("type") == "password") {
+                document.getElementById(source + "_input").setAttribute("type", "text");
+                document.getElementById(source + "_eyei").classList.add("bi-eye");
+                document.getElementById(source + "_eyei").classList.remove("bi-eye-slash");
+            } else if (document.getElementById(source + "_input").getAttribute("type") == "text") {
+                document.getElementById(source + "_input").setAttribute("type", "password");
+                document.getElementById(source + "_eyei").classList.add("bi-eye-slash");
+                document.getElementById(source + "_eyei").classList.remove("bi-eye");
+            }
+        };
+
+        showHideAPI.addEventListener('click', (event) => {
+            toggleEye("api")
+        });
+        showHideSwiftInk.addEventListener('click', (event) => {
+            toggleEye("swiftink")
+        });
+        copyBtn.addEventListener('click', (event) => {
+            const apiKeyValue = document.getElementById("api_input").value
+            navigator.clipboard.writeText(apiKeyValue);
+            copyBtn.innerText = "Copied !"
+        })
+    </script>
+{% endblock%}

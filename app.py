@@ -3,6 +3,7 @@ from flask.logging import default_handler
 from flask_cors import CORS
 from flask_bootstrap import Bootstrap5
 from pathlib import Path
+from uuid import uuid4
 from models import db, Note, AudioRecording, Users
 from swiftink import Swiftink
 import os
@@ -41,27 +42,41 @@ CORS(app)
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
+def generate_api_key(password):
+    return jwt.encode({'password': password, 'uuid': str(uuid4())}, app.secret_key)
+
 @app.route("/")
-def hello_world():
+def home():
+    if session.get("home_message") :
+        message = session.pop("home_message")
+    else :
+        message = None
+
     if session.get('logged_in') == True :
         return render_template("home.html", bootstrap=bootstrap, logged_in=True)
     else :
         if db.session.query(Users).first() :
-            return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=True, message="Please enter your admin password")
+            return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=True, message=message or "Please enter your admin password")
         else :
-            return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=False, message="Please set up your admin password")
+            return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=False, message=message or "Please set up your admin password")
 
 @app.route("/login", methods = ['POST'])
 def login():
+    if session.get("settings_message") :
+        message = session.pop("settings_message")
+    else :
+        message = None
+
     if db.session.query(Users).first().password == request.form.get('password') :
         session["logged_in"] = True
-        return redirect('/')
     else :
-        return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=True, message="Wrong password")
+        session["home_message"] = "Wrong password"
+    return redirect('/')
 
 @app.route("/logout", methods = ['GET'])
 def logout():
     session.clear()
+    session["home_message"] = "Logged out"
     return redirect('/')
 
 @app.route("/pwreset", methods = ['POST'])
@@ -70,23 +85,69 @@ def pwreset():
     user = db.session.query(Users).first()
     db.session.delete(user)
     db.session.commit()
+    session["home_message"] = "Password reset successful"
     return redirect('/')
 
 @app.route("/register", methods = ['POST'])
 def register():
     if request.form.get('password') == request.form.get('password-confirm') :
-        api_key = jwt.encode({'password': request.form.get('password')}, app.secret_key)
         new_user = Users(
-            password = request.form.get('password'),
-            api_key = api_key,
+            password = request.form.get(request.form.get('password')),
+            api_key = generate_api_key(),
             date_created = datetime.datetime.now())
         db.session.add(new_user)
         db.session.commit()
 
         session["logged_in"] = True
-        return redirect('/')
     else :
-        return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=False, message="The passwords did not match")
+        session["home_message"] = "The passwords did not match"
+    return redirect('/')
+
+@app.route("/settings", methods = ['GET'])
+def settings():
+    if session.get("logged_in") :
+        user = db.session.query(Users).first()
+
+        if session.get("settings_message") :
+            message = session.pop("settings_message")
+        else :
+            message = None
+        return render_template("settings.html", logged_in=True, api_key=user.api_key, swiftink_key=user.swiftink_api, message=message)
+    else :
+        return redirect("/")
+
+@app.route("/changesettings", methods = ['POST'])
+def change_settings():
+    if session.get("logged_in") :
+        user = db.session.query(Users).first()
+        message = ""
+
+        if request.form.get('new_password') :
+            if request.form.get('new_password') == request.form.get('new_password_confirm') :
+                if request.form.get('old_password') == user.password :
+                    user.password = request.form.get('new_password')
+                    message += "Successfully changed password. "
+                else :
+                    message += "Invalid password"
+                    pass
+            else :
+                message += "Passwords did not match. "
+                pass
+        if request.form.get('api_key') :
+            user.api_key = generate_api_key(user.password)
+            message += "Generated new API key. "
+        if request.form.get('swiftink_key') :
+            user.swiftink_api = request.form.get('swiftink_key')
+            message += "Saved Swiftink API key. "
+
+        #save db
+        db.session.commit()
+        db.session.flush()
+
+        session["settings_message"] = message
+        return redirect("/settings")
+    else :
+        return redirect("/")
 
 @app.route("/capture/create", methods = ['POST'])
 def capture_create():

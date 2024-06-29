@@ -38,8 +38,10 @@ class Users(db.Model):
     password = db.Column(db.Text())
     api_key = db.Column(db.UnicodeText())
     date_created = db.Column(db.DateTime())
+    swiftink_api = db.Column(db.UnicodeText())
 
-    def __init__(self, password, api_key, date_created):
+    def __init__(self, password, api_key, date_created, swiftink_api=""):
         self.password = password
         self.api_key = api_key
         self.date_created = date_created
+        self.swiftink_api = swiftink_api
