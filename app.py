@@ -46,11 +46,30 @@ def hello_world():
     if session.get('logged_in') == True :
         return render_template("home.html", bootstrap=bootstrap, logged_in=True)
     else :
-        return render_template("home.html", bootstrap=bootstrap, logged_in=False, message="Please set up your admin password")
+        if db.session.query(Users).first() :
+            return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=True, message="Please enter your admin password")
+        else :
+            return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=False, message="Please set up your admin password")
 
 @app.route("/login", methods = ['POST'])
 def login():
-    print(request.form)
+    if db.session.query(Users).first().password == request.form.get('password') :
+        session["logged_in"] = True
+        return redirect('/')
+    else :
+        return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=True, message="Wrong password")
+
+@app.route("/logout", methods = ['GET'])
+def logout():
+    session.clear()
+    return redirect('/')
+
+@app.route("/pwreset", methods = ['POST'])
+def pwreset():
+    session.clear()
+    user = db.session.query(Users).first()
+    db.session.delete(user)
+    db.session.commit()
     return redirect('/')
 
 @app.route("/register", methods = ['POST'])
@@ -67,8 +86,7 @@ def register():
         session["logged_in"] = True
         return redirect('/')
     else :
-        return render_template("home.html", bootstrap=bootstrap, logged_in=False, message="The passwords did not match")
-
+        return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=False, message="The passwords did not match")
 
 @app.route("/capture/create", methods = ['POST'])
 def capture_create():

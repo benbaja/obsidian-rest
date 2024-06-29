@@ -6,6 +6,27 @@
 {% endblock%}
 
 {% block content %}
+
+<!-- Reset Modal -->
+<div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="resetModalLabel">Warning</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Reseting your password will also reset your API key. Proceed ?
+      </div>
+      <div class="modal-footer">
+        <form action="{{ url_for('pwreset')}}" method="POST" >
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+            <button type="submit" class="btn btn-danger">Yes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {% if logged_in %}
 
 {% else %}
@@ -14,13 +35,15 @@
         {{ message }}
     </div>
     {% endif %}
-    
+
     {% if registered %}
-    <form>
+    <form action="{{ url_for('login')}}" enctype="application/x-www-form-urlencoded" method="POST">
         <div class="input-group mb-3">
             <span class="input-group-text" id="password-span">Password</span>
-            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span">
+            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="password">
         </div>
+        <button class="btn btn-primary" type="submit">Login</button>
+        <button class="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#resetModal">Reset Password</button>
     </form>
 
     {% else %}
