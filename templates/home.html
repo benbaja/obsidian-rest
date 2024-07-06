@@ -51,7 +51,7 @@
     const audioInput = document.getElementById("formFile");
     const submitButton = document.getElementById("submitButton");
 
-    const displayToast = (failType = null, isAudio) => {
+    const displayToast = (failType, isAudio) => {
         const uploadType = isAudio ? "audio" : "note";
         let toast = document.getElementById(uploadType + "-result-toast");
         const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast);
@@ -108,7 +108,7 @@
                 }).then((data) => {
                     submitButtonToggle();
                     if (data.ok) {
-                        displayToast(isAudio=true)
+                        displayToast(failType=null, isAudio=true)
                     } else {
                         displayToast(failType="transcription", isAudio=true)
                     }
@@ -135,7 +135,7 @@
                 }
             }).then((data) => {
                 if (data.ok){
-                    displayToast(isAudio=false)
+                    displayToast(failType=null, isAudio=false)
                     captureInput.value = "";
                 } else {
                     displayToast(failType="upload", isAudio=false)
