@@ -197,7 +197,11 @@ def capture_create():
         return {"new_note_id": new_note.note_id}
 
     elif capture_type == "audio" :
-        audio_file = base64.b64decode(capture_data.get("audio"))
+        if "," in capture_data.get("audio") :
+            audio_header, audio_data = capture_data.get("audio").split(",")
+        else :
+            audio_data = capture_data.get("audio")
+        audio_file = base64.b64decode(audio_data)
         file_path = "audio_captures/" + capture_data.get("file_name")
         # create audio capture folder if it doesn't exist
         Path("audio_captures").mkdir(parents=False, exist_ok=True)
