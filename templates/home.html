@@ -6,59 +6,144 @@
 {% endblock%}
 
 {% block content %}
+<!-- Toasts -->
+<div class="toast-container top-0 end-0 p-3">
+  <div class="toast align-items-center text-bg-primary border-0" id="note-result-toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+        <div class="toast-body" id="note-result-toast-body"></div>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
 
-<!-- Reset Modal -->
-<div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="resetModalLabel">Warning</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        Reseting your password will also reset your API key. Proceed ?
-      </div>
-      <div class="modal-footer">
-        <form action="{{ url_for('pwreset')}}" method="POST" >
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-            <button type="submit" class="btn btn-danger">Yes</button>
-        </form>
-      </div>
+  <div class="toast align-items-center text-bg-primary border-0" id="audio-result-toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+        <div class="toast-body" id="audio-result-toast-body"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
   </div>
 </div>
-{% if logged_in %}
 
-{% else %}
-    {% if message %}
-    <div class="alert alert-info" role="alert">
-        {{ message }}
-    </div>
-    {% endif %}
+<!-- Forms -->
+<div class="mb-3">
+    <label for="formFile" class="form-label">Capture audio note</label>
+    <input class="form-control" type="file" id="formFile" accept="audio/*">
+</div>
 
-    {% if registered %}
-    <form action="{{ url_for('login')}}" enctype="application/x-www-form-urlencoded" method="POST">
-        <div class="input-group mb-3">
-            <span class="input-group-text" id="password-span">Password</span>
-            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="password">
-        </div>
-        <button class="btn btn-primary" type="submit">Login</button>
-        <button class="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#resetModal">Reset Password</button>
-    </form>
+<hr />
 
-    {% else %}
-    <form action="{{ url_for('register')}}" enctype="application/x-www-form-urlencoded" method="POST">
-        <div class="input-group mb-3">
-            <span class="input-group-text" id="password-span" style="width:10em">Password</span>
-            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="password">
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text" id="password-confirm-span" style="width:10em">Confirm password</span>
-            <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="password-confirm">
-        </div>
-        <button class="btn btn-primary" type="submit">Register</button>
-    </form>
-    {% endif %}
-{% endif %}
+<label for="captureInput" class="form-label">Capture Note</label>
+<div class="input-group">
+    <span class="input-group-text">Capture</span>
+    <textarea class="form-control" aria-label="With textarea" name="capture" id="captureInput"></textarea>
+</div>
+<br>
+<div class="form-check">
+    <input class="form-check-input" type="checkbox" value="" id="todoCheck" name="todo-check">
+    <label class="form-check-label" for="todoCheck">Is a to-do item</label>
+</div>
+<br>
+<button type="button" class="btn btn-primary" id="submitButton">Submit</button>
 
+
+<script>
+    const captureInput = document.getElementById("captureInput");
+    const todoCheck = document.getElementById("todoCheck");
+    const audioInput = document.getElementById("formFile");
+    const submitButton = document.getElementById("submitButton");
+
+    const displayToast = (failType = null, isAudio) => {
+        const uploadType = isAudio ? "audio" : "note";
+        let toast = document.getElementById(uploadType + "-result-toast");
+        const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast);
+        let toastBody = document.getElementById(uploadType + "-result-toast-body");
+        if (failType) {
+            toastBody.innerText = uploadType + " " + failType + " failed." ;
+            if (toast.classList.contains("text-bg-primary")) {
+                toast.classList.add("text-bg-danger");
+                toast.classList.remove("text-bg-primary");
+            }
+        } else {
+            toastBody.innerText = uploadType + " uploaded successfully.";
+            if (toast.classList.contains("text-bg-danger")) {
+                toast.classList.add("text-bg-primary");
+                toast.classList.remove("text-bg-danger");
+            }
+        }
+        toastBootstrap.show()
+        
+    }
+
+    const submitButtonToggle = () => {
+        if (submitButton.disabled) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = "Submit";
+        } else {
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <span role="status"> Submitting...</span>`
+        }
+    }
+
+    submitButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (audioInput.files.length) {
+            submitButtonToggle();
+
+            let reader = new FileReader();
+            reader.readAsDataURL(audioInput.files[0]);
+            reader.onload = () => {
+                fetch("/capture/create", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        capture_type : 'audio',
+                        data: {
+                            audio: reader.result,
+                            file_name: audioInput.files[0].name
+                        },
+                    }),
+                    headers: { 
+                        "Content-type": "application/json; charset=UTF-8",
+                        "Authorization": "{{ user_info.api_key }}"
+                    }
+                }).then((data) => {
+                    submitButtonToggle();
+                    if (data.ok) {
+                        displayToast(isAudio=true)
+                    } else {
+                        displayToast(failType="transcription", isAudio=true)
+                    }
+                }).catch((error) => {
+                    submitButtonToggle();
+                    displayToast(failType="upload", isAudio=true)
+                });
+            }
+        };
+
+        if (captureInput.value) {
+            fetch("/capture/create", {
+                method: "POST",
+                body: JSON.stringify({
+                    capture_type : 'note',
+                    data: {
+                        text: captureInput.value
+                    },
+                    todo: todoCheck.checked
+                }),
+                headers: { 
+                    "Content-type": "application/json; charset=UTF-8",
+                    "Authorization": "{{ user_info.api_key }}"
+                }
+            }).then((data) => {
+                if (data.ok){
+                    displayToast(isAudio=false)
+                    captureInput.value = "";
+                } else {
+                    displayToast(failType="upload", isAudio=false)
+                }
+            }).catch((error) => {
+                displayToast(failType="upload", isAudio=false)
+            });
+        };
+    });
+</script>
 {% endblock%}

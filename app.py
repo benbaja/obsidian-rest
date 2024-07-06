@@ -13,6 +13,7 @@ import jwt
 import datetime
 import logging
 import base64
+#import whisper
 
 # setup logger to write to file
 logger = logging.getLogger('werkzeug')
@@ -74,19 +75,20 @@ def home():
         message = None
 
     if session.get('logged_in') == True :
-        return render_template("home.html", bootstrap=bootstrap, logged_in=True)
+        user = db.session.query(Users).first()
+        return render_template("home.html", bootstrap=bootstrap, logged_in=True, user_info=user)
     else :
         if db.session.query(Users).first() :
-            return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=True, message=message or "Please enter your admin password")
+            return render_template("auth.html", bootstrap=bootstrap, logged_in=False, registered=True, message=message or "Please enter your admin password")
         else :
-            return render_template("home.html", bootstrap=bootstrap, logged_in=False, registered=False, message=message or "Please set up your admin password")
+            return render_template("auth.html", bootstrap=bootstrap, logged_in=False, registered=False, message=message or "Please set up your admin password")
 
 @app.route("/login", methods = ['POST'])
 def login():
-    if session.get("settings_message") :
-        message = session.pop("settings_message")
-    else :
-        message = None
+    #if session.get("settings_message") :
+    #    message = session.pop("settings_message")
+    #else :
+    #    message = None
 
     if db.session.query(Users).first().password == request.form.get('password') :
         session["logged_in"] = True
@@ -131,11 +133,11 @@ def settings():
     if session.get("logged_in") :
         user = db.session.query(Users).first()
 
-        if session.get("settings_message") :
-            message = session.pop("settings_message")
-        else :
-            message = None
-        return render_template("settings.html", logged_in=True, api_key=user.api_key, swiftink_key=user.swiftink_api, message=message)
+        #if session.get("settings_message") :
+        #    message = session.pop("settings_message")
+        #else :
+        #    message = None
+        return render_template("settings.html", logged_in=True, api_key=user.api_key, swiftink_key=user.swiftink_api, message=session.get("settings_message"))
     else :
         return redirect("/")
 
@@ -215,7 +217,7 @@ def capture_create():
         # try to transcript the audio file
         transcription_result = Swiftink(file_path, logger)
         if transcription_result.text :
-            # check length of note and split if > 50kb
+            # todo : check length of note and split if > 50kb
             # add the transcript to the note database if succeeded
             db.session.add(
                 Note(
@@ -233,7 +235,7 @@ def capture_create():
 
         else :
             # return id of audio
-            return {"new_audio_id": new_audio.audio_id}
+            return jsonify({'message': 'Server error', "new_audio_id": new_audio.audio_id}), 500
 
     return "Invalid payload ", 400
 
