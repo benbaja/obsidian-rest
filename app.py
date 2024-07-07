@@ -21,7 +21,7 @@ log_formatter = logging.Formatter("%(asctime)s %(levelname)s:%(message)s")
 logger.setLevel(logging.DEBUG)
 
 Path("logs").mkdir(parents=False, exist_ok=True)
-log_file_path = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log"
+log_file_path = "var/logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log"
 log_file_handler = logging.FileHandler(log_file_path)
 log_file_handler.setFormatter(log_formatter)
 logger.addHandler(log_file_handler)
@@ -30,7 +30,7 @@ log_stream_handler = logging.StreamHandler(sys.stdout)
 log_stream_handler.setFormatter(log_formatter)
 logger.addHandler(log_stream_handler)
 
-app = Flask(__name__)
+app = Flask(__name__, instance_path=os.path.abspath('var/instance'))
 app.logger.removeHandler(default_handler)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///obsidian-audio-capture.db'
@@ -202,7 +202,7 @@ def capture_create():
         else :
             audio_data = capture_data.get("audio")
         audio_file = base64.b64decode(audio_data)
-        file_path = "audio_captures/" + capture_data.get("file_name")
+        file_path = "var/audio_captures/" + capture_data.get("file_name")
         # create audio capture folder if it doesn't exist
         Path("audio_captures").mkdir(parents=False, exist_ok=True)
 

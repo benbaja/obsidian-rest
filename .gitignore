@@ -1,6 +1,7 @@
 venv/
 __pycache__/
-instance/
 audio_captures/
-logs/
 .gitignore
+var/
+test.ipynb
+todo.md
