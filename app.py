@@ -14,6 +14,7 @@ import datetime
 import logging
 import base64
 #import whisper
+from views.auth import auth
 
 # setup logger to write to file
 logger = logging.getLogger('werkzeug')
@@ -43,6 +44,8 @@ bootstrap = Bootstrap5(app)
 CORS(app)
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
+
+app.register_blueprint(auth)
 
 def generate_api_key(password):
     return jwt.encode(payload={'password': password, 'uuid': str(uuid4())}, key=app.secret_key, algorithm="HS256")
@@ -82,51 +85,6 @@ def home():
             return render_template("auth.html", bootstrap=bootstrap, logged_in=False, registered=True, message=message or "Please enter your admin password")
         else :
             return render_template("auth.html", bootstrap=bootstrap, logged_in=False, registered=False, message=message or "Please set up your admin password")
-
-@app.route("/login", methods = ['POST'])
-def login():
-    #if session.get("settings_message") :
-    #    message = session.pop("settings_message")
-    #else :
-    #    message = None
-
-    if db.session.query(Users).first().password == request.form.get('password') :
-        session["logged_in"] = True
-    else :
-        session["home_message"] = "Wrong password"
-    return redirect('/')
-
-@app.route("/logout", methods = ['GET'])
-def logout():
-    session.clear()
-    session["home_message"] = "Logged out"
-    return redirect('/')
-
-@app.route("/pwreset", methods = ['POST'])
-def pwreset():
-    session.clear()
-    user = db.session.query(Users).first()
-    db.session.delete(user)
-    db.session.commit()
-    session["home_message"] = "Password reset successful"
-    return redirect('/')
-
-@app.route("/register", methods = ['POST'])
-def register():
-    if request.form.get('password') == request.form.get('password-confirm') :
-        new_user = Users(
-            password = request.form.get(request.form.get('password')),
-            api_key = generate_api_key(),
-            date_created = datetime.datetime.now())
-        db.session.add(new_user)
-        db.session.commit()
-
-        session["logged_in"] = True
-        session["settings_message"] = "Please copy your API key and input your swiftink key"
-        return redirect('/settings')
-    else :
-        session["home_message"] = "The passwords did not match"
-        return redirect('/')
 
 @app.route("/settings", methods = ['GET'])
 def settings():

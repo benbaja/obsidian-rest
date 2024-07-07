@@ -19,7 +19,7 @@
         Reseting your password will also reset your API key. Proceed ?
       </div>
       <div class="modal-footer">
-        <form action="{{ url_for('pwreset')}}" method="POST" >
+        <form action="{{ url_for('auth.pwreset')}}" method="POST" >
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
             <button type="submit" class="btn btn-danger">Yes</button>
         </form>
@@ -34,7 +34,7 @@
 {% endif %}
 
 {% if registered %}
-<form action="{{ url_for('login')}}" enctype="application/x-www-form-urlencoded" method="POST">
+<form action="{{ url_for('auth.login')}}" enctype="application/x-www-form-urlencoded" method="POST">
     <div class="input-group mb-3">
         <span class="input-group-text" id="password-span">Password</span>
         <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="password">
@@ -44,7 +44,7 @@
 </form>
 
 {% else %}
-<form action="{{ url_for('register')}}" enctype="application/x-www-form-urlencoded" method="POST">
+<form action="{{ url_for('auth.register')}}" enctype="application/x-www-form-urlencoded" method="POST">
     <div class="input-group mb-3">
         <span class="input-group-text" id="password-span" style="width:10em">Password</span>
         <input type="password" class="form-control" aria-label="Username" aria-describedby="password-span" name="password">
