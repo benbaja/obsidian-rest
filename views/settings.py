@@ -10,7 +10,7 @@ def root():
         user = db.session.query(Users).first()
         return render_template("settings.html", logged_in=True, api_key=user.api_key, swiftink_key=user.swiftink_api, message=session.get("settings_message"))
     else :
-        return redirect("/")
+        return redirect(url_for("routes.home"))
 
 @settings.route("/change", methods = ['POST'])
 def change():
@@ -43,4 +43,4 @@ def change():
         session["settings_message"] = message
         return redirect("/settings")
     else :
-        return redirect("/")
+        return redirect(url_for("routes.home"))

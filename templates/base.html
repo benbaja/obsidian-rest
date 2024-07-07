@@ -34,7 +34,7 @@
               <a class="navbar-brand" href="#">Obsidian Audio Capture</a>
               <ul class="nav nav-tabs">
                   <li class="nav-item">
-                    <a class="nav-link {{ 'active' if active == 'home' }}" aria-current="page" href="/">Home</a>
+                    <a class="nav-link {{ 'active' if active == 'home' }}" aria-current="page" href="{{ url_for('routes.home') }}">Home</a>
                   </li>
                   <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle {{ 'active' if active in ['captures', 'audio'] }} {{ 'disabled' if not logged_in }}" data-bs-toggle="dropdown" role="button" aria-expanded="false">Browse</a>

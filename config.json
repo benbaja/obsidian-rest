@@ -1,0 +1,5 @@
+{
+    "DEBUG": true,
+    "SQLALCHEMY_DATABASE_URI": "sqlite:///obsidian-audio-capture.db",
+    "SQLALCHEMY_TRACK_MODIFICATIONS": false
+}

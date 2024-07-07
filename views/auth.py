@@ -12,13 +12,13 @@ def login():
         session["logged_in"] = True
     else :
         session["home_message"] = "Wrong password"
-    return redirect('/')
+    return redirect(url_for("routes.home"))
 
 @auth.route("/logout", methods = ['GET'])
 def logout():
     session.clear()
     session["home_message"] = "Logged out"
-    return redirect('/')
+    return redirect(url_for("routes.home"))
 
 @auth.route("/pwreset", methods = ['POST'])
 def pwreset():
@@ -27,7 +27,7 @@ def pwreset():
     db.session.delete(user)
     db.session.commit()
     session["home_message"] = "Password reset successful"
-    return redirect('/')
+    return redirect(url_for("routes.home"))
 
 @auth.route("/register", methods = ['POST'])
 def register():
@@ -42,7 +42,7 @@ def register():
 
         session["logged_in"] = True
         session["settings_message"] = "Please copy your API key and input your swiftink key"
-        return redirect('/settings')
+        return redirect(url_for("settings.root"))
     else :
         session["home_message"] = "The passwords did not match"
-        return redirect('/')
+        return redirect(url_for("routes.home"))
