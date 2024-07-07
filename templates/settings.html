@@ -12,7 +12,7 @@
     </div>
     {% endif %}
     
-    <form action="{{ url_for('change_settings')}}" enctype="application/x-www-form-urlencoded" method="POST">
+    <form action="{{ url_for('settings.change')}}" enctype="application/x-www-form-urlencoded" method="POST">
         <div class="input-group mb-3">
             <label class="form-label" labelfor="api_input">API Token</label>
             <div class="input-group">
@@ -28,7 +28,7 @@
 
     <br>
 
-    <form action="{{ url_for('change_settings')}}" enctype="application/x-www-form-urlencoded" method="POST">
+    <form action="{{ url_for('settings.change')}}" enctype="application/x-www-form-urlencoded" method="POST">
         <div class="input-group mb-3">
             <label class="form-label" labelfor="swiftink_input">Swiftink API Token</label>
             <div class="input-group">
@@ -44,7 +44,7 @@
 
     <br>
 
-    <form action="{{ url_for('change_settings')}}" enctype="application/x-www-form-urlencoded" method="POST">
+    <form action="{{ url_for('settings.change')}}" enctype="application/x-www-form-urlencoded" method="POST">
             <label class="form-label" labelfor="old-password">Change Password (this will also regenerate your token)</label>
         <div class="input-group mb-3">
             <span class="input-group-text" id="old-password-span" style="width:12em">Old password</span>

@@ -4,16 +4,15 @@ from flask_cors import CORS
 from flask_bootstrap import Bootstrap5
 from pathlib import Path
 from functools import wraps
-from models import db, Note, AudioRecording, Users
+from models import db, Users
 from swiftink import Swiftink
 from tools import generate_token
 import os
 import sys
-import datetime
 import logging
-import base64
 #import whisper
 from views.auth import auth
+from views.settings import settings
 
 # setup logger to write to file
 logger = logging.getLogger('werkzeug')
@@ -45,26 +44,7 @@ CORS(app)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 app.register_blueprint(auth)
-
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get("Authorization")
-        if token :
-            try :
-                decoded_token = jwt.decode(jwt=token, key=app.secret_key, algorithms=['HS256'])
-            except :
-                return jsonify({'message': 'Invalid token'}), 403
-            user = db.session.query(Users).first()
-
-            if decoded_token.get("password") == user.password :
-                return f(*args, **kwargs)
-            else :
-                return jsonify({'message': 'Invalid token'}), 403
-        else :
-            return jsonify({'message': 'Missing token'}), 403
-    return decorated
-
+app.register_blueprint(settings)
 
 @app.route("/")
 def home():
@@ -81,52 +61,6 @@ def home():
             return render_template("auth.html", bootstrap=bootstrap, logged_in=False, registered=True, message=message or "Please enter your admin password")
         else :
             return render_template("auth.html", bootstrap=bootstrap, logged_in=False, registered=False, message=message or "Please set up your admin password")
-
-@app.route("/settings", methods = ['GET'])
-def settings():
-    if session.get("logged_in") :
-        user = db.session.query(Users).first()
-
-        #if session.get("settings_message") :
-        #    message = session.pop("settings_message")
-        #else :
-        #    message = None
-        return render_template("settings.html", logged_in=True, api_key=user.api_key, swiftink_key=user.swiftink_api, message=session.get("settings_message"))
-    else :
-        return redirect("/")
-
-@app.route("/changesettings", methods = ['POST'])
-def change_settings():
-    if session.get("logged_in") :
-        user = db.session.query(Users).first()
-        message = ""
-
-        if request.form.get('new-password') :
-            if request.form.get('new-password') == request.form.get('new-password-confirm') :
-                if request.form.get('old-password') == user.password :
-                    user.password = request.form.get('new-password')
-                    user.api_key = generate_token(request.form.get('new-password'))
-                    message += "Successfully changed password. "
-                else :
-                    message += "Invalid password"
-            else :
-                message += "Passwords did not match. "
-
-        if request.form.get('api_key') :
-            user.api_key = generate_token(user.password)
-            message += "Generated new API key. "
-
-        if request.form.get('swiftink_key') :
-            user.swiftink_api = request.form.get('swiftink_key')
-            message += "Saved Swiftink API key. "
-
-        db.session.commit()
-        db.session.flush()
-
-        session["settings_message"] = message
-        return redirect("/settings")
-    else :
-        return redirect("/")
 
 @app.route("/capture/create", methods = ['POST'])
 @token_required
