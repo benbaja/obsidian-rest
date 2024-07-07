@@ -4,12 +4,10 @@ from flask_cors import CORS
 from flask_bootstrap import Bootstrap5
 from pathlib import Path
 from functools import wraps
-from uuid import uuid4
 from models import db, Note, AudioRecording, Users
 from swiftink import Swiftink
 import os
 import sys
-import jwt
 import datetime
 import logging
 import base64
@@ -46,9 +44,6 @@ CORS(app)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 app.register_blueprint(auth)
-
-def generate_api_key(password):
-    return jwt.encode(payload={'password': password, 'uuid': str(uuid4())}, key=app.secret_key, algorithm="HS256")
 
 def token_required(f):
     @wraps(f)

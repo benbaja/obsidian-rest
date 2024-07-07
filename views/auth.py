@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
 from models import db, Note, AudioRecording, Users
-#from app import generate_api_key
+from tools import generate_api_key
 
 import datetime
 
@@ -34,7 +34,7 @@ def register():
     if request.form.get('password') == request.form.get('password-confirm') :
         new_user = Users(
             password = request.form.get(request.form.get('password')),
-            api_key = generate_api_key(),
+            api_key = generate_api_key(request.form.get('password')),
             date_created = datetime.datetime.now())
         db.session.add(new_user)
         db.session.commit()
