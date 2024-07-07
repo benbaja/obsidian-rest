@@ -55,12 +55,12 @@ def home():
 
     if session.get('logged_in') == True :
         user = db.session.query(Users).first()
-        return render_template("home.html", bootstrap=bootstrap, logged_in=True, user_info=user)
+        return render_template("home.html", logged_in=True, user_info=user)
     else :
         if db.session.query(Users).first() :
-            return render_template("auth.html", bootstrap=bootstrap, logged_in=False, registered=True, message=message or "Please enter your admin password")
+            return render_template("auth.html", logged_in=False, registered=True, message=message or "Please enter your admin password")
         else :
-            return render_template("auth.html", bootstrap=bootstrap, logged_in=False, registered=False, message=message or "Please set up your admin password")
+            return render_template("auth.html", logged_in=False, registered=False, message=message or "Please set up your admin password")
 
 if __name__ == "__main__" :
     with app.app_context():
