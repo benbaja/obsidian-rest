@@ -11,7 +11,6 @@ import logging
 import logging.config
 import datetime
 #import whisper
-from tools import WerkzeugFilter
 from views.auth import auth
 from views.settings import settings
 from views.capture import capture
@@ -26,7 +25,7 @@ def create_app(config_file):
     logging.config.dictConfig(config_json["LOGGER_CONFIG"])
 
     app.config.from_file(config_file, load=json.load)
-    app.config.from_prefixed_env()
+    app.config.from_prefixed_env() #this must fail if not found
     
     db.init_app(app)
     bootstrap = Bootstrap5(app)

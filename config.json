@@ -10,6 +10,18 @@
         "formatters": {
             "basic": {
                 "format": "%(asctime)s %(levelname)s:%(message)s"
+            },
+            "json": {
+                "()": "tools.JSONFormatter",
+                "fmt_keys": {
+                    "level": "levelname",
+                    "message": "message",
+                    "timestamp": "created",
+                    "logger": "name",
+                    "module": "module",
+                    "function": "funcName",
+                    "line": "lineno"
+                }
             }
         },
         "handlers": {
@@ -25,18 +37,26 @@
                 "formatter": "basic",
                 "stream": "ext://sys.stderr"
             },
-            "file": {
+            "log_file": {
                 "class": "logging.handlers.RotatingFileHandler",
                 "level": "INFO",
                 "formatter": "basic",
                 "filename": "var/logs/OAC.log",
                 "maxBytes": 5000000,
                 "backupCount": 5
+            },
+            "json_file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "level": "INFO",
+                "formatter": "json",
+                "filename": "var/logs/OAC.log.jsonl",
+                "maxBytes": 5000000,
+                "backupCount": 5
             }
         },
         "filters": {
             "werkzeug_filter": {
-              "()" : "__main__.WerkzeugFilter"
+              "()" : "tools.WerkzeugFilter"
             }
         },
         "loggers": {
@@ -44,14 +64,16 @@
                 "level": "DEBUG",
                 "handlers": [
                     "stdout",
-                    "file"
+                    "log_file",
+                    "json_file"
                 ]
             },
             "werkzeug": {
                 "level": "DEBUG",
                 "handlers": [
                     "stdout",
-                    "file"
+                    "log_file",
+                    "json_file"
                 ],
                 "filters": [
                     "werkzeug_filter"
@@ -61,7 +83,8 @@
                 "level": "DEBUG",
                 "handlers": [
                     "stdout",
-                    "file"
+                    "log_file",
+                    "json_file"
                 ]
             }
         }

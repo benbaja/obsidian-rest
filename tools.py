@@ -7,6 +7,7 @@ import time
 import requests
 import json
 import logging
+import datetime as dt
 
 werkzeug_regex = r'\[.+\] '
 
@@ -14,13 +15,26 @@ class WerkzeugFilter(logging.Formatter):
     def filter(self, record):
         message = record.msg
         if re.findall(werkzeug_regex, message) :
-            print("yes")
             record.msg = re.sub(
                 werkzeug_regex,
                 '',
                 message
             )
         return True
+
+class JSONFormatter(logging.Formatter):
+    def __init__(self, *, fmt_keys) :
+        super().__init__()
+        self.fmt_keys = fmt_keys if fmt_keys is not None else {}
+
+    def format(self, record):
+        message = {
+            key: getattr(record, val) for key, val in self.fmt_keys.items()} 
+        message.update({
+            "message": record.getMessage(), 
+            "timestamp": dt.datetime.fromtimestamp(record.created, tz=dt.timezone.utc)})
+
+        return json.dumps(message, default=str)
 
 def generate_token(password):
     return jwt.encode(payload={'password': password, 'uuid': str(uuid4())}, key=current_app.secret_key, algorithm="HS256")
