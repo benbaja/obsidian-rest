@@ -1,33 +1,12 @@
 from flask import Blueprint, current_app, request, session, jsonify
 from models import db, Note, AudioRecording, Users
 from tools import Swiftink
-
-import jwt
 import base64
 import datetime
 from pathlib import Path
-from functools import wraps
+from tools import token_required
 
 capture = Blueprint('capture', __name__, url_prefix='/capture')
-
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get("Authorization")
-        if token :
-            try :
-                decoded_token = jwt.decode(jwt=token, key=current_app.secret_key, algorithms=['HS256'])
-            except :
-                return jsonify({'message': 'Invalid token'}), 403
-            user = db.session.query(Users).first()
-
-            if decoded_token.get("password") == user.password :
-                return f(*args, **kwargs)
-            else :
-                return jsonify({'message': 'Invalid token'}), 403
-        else :
-            return jsonify({'message': 'Missing token'}), 403
-    return decorated
 
 @capture.route("/create", methods = ['POST'])
 @token_required

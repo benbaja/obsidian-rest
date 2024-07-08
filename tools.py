@@ -1,8 +1,10 @@
-import jwt
 from uuid import uuid4
-from flask import current_app
+from functools import wraps
+from flask import current_app, request, jsonify
+from models import db, Users
 import os
 import re
+import jwt
 import time
 import requests
 import json
@@ -37,7 +39,28 @@ class JSONFormatter(logging.Formatter):
         return json.dumps(message, default=str)
 
 def generate_token(password):
-    return jwt.encode(payload={'password': password, 'uuid': str(uuid4())}, key=current_app.secret_key, algorithm="HS256")
+    new_uuid = str(uuid4())
+    token = jwt.encode(payload={'password': password, 'uuid': new_uuid}, key=current_app.secret_key, algorithm="HS256")
+    return token, new_uuid
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("Authorization")
+        if token :
+            try :
+                decoded_token = jwt.decode(jwt=token, key=current_app.secret_key, algorithms=['HS256'])
+            except :
+                return jsonify({'message': 'Invalid token'}), 403
+            user = db.session.query(Users).first()
+
+            if decoded_token.get("password") == user.password and decoded_token.get("uuid") == user.uuid :
+                return f(*args, **kwargs)
+            else :
+                return jsonify({'message': 'Invalid token'}), 403
+        else :
+            return jsonify({'message': 'Missing token'}), 403
+    return decorated
 
 class Swiftink() :
     def __init__(self, file_path, logger=None) :

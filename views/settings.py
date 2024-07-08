@@ -22,7 +22,9 @@ def change():
             if request.form.get('new-password') == request.form.get('new-password-confirm') :
                 if request.form.get('old-password') == user.password :
                     user.password = request.form.get('new-password')
-                    user.api_key = generate_token(request.form.get('new-password'))
+                    token, uuid = generate_token(request.form.get('new-password'))
+                    user.api_key = token
+                    user.uuid = uuid
                     message += "Successfully changed password. "
                 else :
                     message += "Invalid password"
@@ -30,7 +32,9 @@ def change():
                 message += "Passwords did not match. "
 
         if request.form.get('api_key') :
-            user.api_key = generate_token(user.password)
+            token, uuid = generate_token(user.password)
+            user.api_key = token
+            user.uuid = uuid
             message += "Generated new API key. "
 
         if request.form.get('swiftink_key') :

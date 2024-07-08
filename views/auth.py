@@ -32,10 +32,11 @@ def pwreset():
 @auth.route("/register", methods = ['POST'])
 def register():
     if request.form.get('password') == request.form.get('password-confirm') :
-        print(request.form)
+        token, uuid = generate_token(request.form.get('password'))
         new_user = Users(
             password = request.form.get('password'),
-            api_key = generate_token(request.form.get('password')),
+            api_key = token,
+            uuid = uuid,
             date_created = datetime.datetime.now())
         db.session.add(new_user)
         db.session.commit()
