@@ -1,16 +1,13 @@
-from flask import Flask, render_template, request, redirect, jsonify, session, url_for
-from flask.logging import default_handler
+from flask import Flask
 from flask_bootstrap import Bootstrap5
 from pathlib import Path
-from models import db, Users
+from models import db
 import flask_cors
+import atexit
 import json
 import os
-import sys
 import logging
 import logging.config
-import datetime
-#import whisper
 from views.auth import auth
 from views.settings import settings
 from views.capture import capture

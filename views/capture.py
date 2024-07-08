@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, redirect, render_template, request, session, url_for, jsonify
+from flask import Blueprint, current_app, request, session, jsonify
 from models import db, Note, AudioRecording, Users
 from tools import Swiftink
 

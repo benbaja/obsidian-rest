@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
+from flask import Blueprint, redirect, render_template, request, session, url_for
 from models import db, Users
 from tools import generate_token
 
