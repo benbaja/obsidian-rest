@@ -2,10 +2,25 @@ import jwt
 from uuid import uuid4
 from flask import current_app
 import os
+import re
 import time
 import requests
 import json
 import logging
+
+werkzeug_regex = r'\[.+\] '
+
+class WerkzeugFilter(logging.Formatter):
+    def filter(self, record):
+        message = record.msg
+        if re.findall(werkzeug_regex, message) :
+            print("yes")
+            record.msg = re.sub(
+                werkzeug_regex,
+                '',
+                message
+            )
+        return True
 
 def generate_token(password):
     return jwt.encode(payload={'password': password, 'uuid': str(uuid4())}, key=current_app.secret_key, algorithm="HS256")

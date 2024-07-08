@@ -8,39 +8,29 @@ import json
 import os
 import sys
 import logging
+import logging.config
 import datetime
 #import whisper
+from tools import WerkzeugFilter
 from views.auth import auth
 from views.settings import settings
 from views.capture import capture
 from views.routes import routes
 
 def create_app(config_file): 
-    # setup logger to write to file
-    logger = logging.getLogger('werkzeug')
-    log_formatter = logging.Formatter("%(asctime)s %(levelname)s:%(message)s")
-    logger.setLevel(logging.DEBUG)
+    config_json = json.load(open(config_file))
+    instance_path = os.path.abspath(config_json["INSTANCE_PATH"])
+    app = Flask(__name__, instance_path=instance_path)
 
-    Path("logs").mkdir(parents=False, exist_ok=True)
-    log_file_path = "var/logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log"
-    log_file_handler = logging.FileHandler(log_file_path)
-    log_file_handler.setFormatter(log_formatter)
-    logger.addHandler(log_file_handler)
-
-    log_stream_handler = logging.StreamHandler(sys.stdout)
-    log_stream_handler.setFormatter(log_formatter)
-    logger.addHandler(log_stream_handler)
-
-    app = Flask(__name__, instance_path=os.path.abspath('var/instance'))
-    app.logger.removeHandler(default_handler)
+    Path(config_json["LOGS_PATH"]).mkdir(parents=False, exist_ok=True)
+    logging.config.dictConfig(config_json["LOGGER_CONFIG"])
 
     app.config.from_file(config_file, load=json.load)
     app.config.from_prefixed_env()
     
     db.init_app(app)
     bootstrap = Bootstrap5(app)
-    # authorize cross-origin AJAX for Obsidian
-    flask_cors.CORS(app)
+    flask_cors.CORS(app) # authorize cross-origin AJAX for Obsidian
 
     app.register_blueprint(auth)
     app.register_blueprint(settings)

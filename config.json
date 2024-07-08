@@ -1,5 +1,69 @@
 {
     "DEBUG": true,
     "SQLALCHEMY_DATABASE_URI": "sqlite:///obsidian-audio-capture.db",
-    "SQLALCHEMY_TRACK_MODIFICATIONS": false
+    "SQLALCHEMY_TRACK_MODIFICATIONS": false,
+    "INSTANCE_PATH": "var/instance/",
+    "LOGS_PATH": "var/logs/",
+    "LOGGER_CONFIG": {
+        "version": 1,
+        "disable_existing_loggers": false,
+        "formatters": {
+            "basic": {
+                "format": "%(asctime)s %(levelname)s:%(message)s"
+            }
+        },
+        "handlers": {
+            "stdout": {
+                "class": "logging.StreamHandler",
+                "level": "DEBUG",
+                "formatter": "basic",
+                "stream": "ext://sys.stdout"
+            },
+            "stderr": {
+                "class": "logging.StreamHandler",
+                "level": "WARNING",
+                "formatter": "basic",
+                "stream": "ext://sys.stderr"
+            },
+            "file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "level": "INFO",
+                "formatter": "basic",
+                "filename": "var/logs/OAC.log",
+                "maxBytes": 5000000,
+                "backupCount": 5
+            }
+        },
+        "filters": {
+            "werkzeug_filter": {
+              "()" : "__main__.WerkzeugFilter"
+            }
+        },
+        "loggers": {
+            "root": {
+                "level": "DEBUG",
+                "handlers": [
+                    "stdout",
+                    "file"
+                ]
+            },
+            "werkzeug": {
+                "level": "DEBUG",
+                "handlers": [
+                    "stdout",
+                    "file"
+                ],
+                "filters": [
+                    "werkzeug_filter"
+                ]
+            },
+            "app": {
+                "level": "DEBUG",
+                "handlers": [
+                    "stdout",
+                    "file"
+                ]
+            }
+        }
+    }
 }
