@@ -8,6 +8,7 @@ import json
 import os
 import logging
 import logging.config
+from tools import get_secret_key
 from views.auth import auth
 from views.settings import settings
 from views.capture import capture
@@ -15,6 +16,7 @@ from views.routes import routes
 
 def create_app(config_file): 
     config_json = json.load(open(config_file))
+
     instance_path = os.path.abspath(config_json["INSTANCE_PATH"])
     app = Flask(__name__, instance_path=instance_path)
 
@@ -22,7 +24,7 @@ def create_app(config_file):
     logging.config.dictConfig(config_json["LOGGER_CONFIG"])
 
     app.config.from_file(config_file, load=json.load)
-    app.config.from_prefixed_env() #this must fail if not found
+    app.config["SECRET_KEY"] = get_secret_key()
     
     db.init_app(app)
     bootstrap = Bootstrap5(app)

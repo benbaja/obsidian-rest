@@ -6,6 +6,7 @@ import os
 import re
 import jwt
 import time
+import secrets
 import requests
 import json
 import logging
@@ -17,11 +18,7 @@ class WerkzeugFilter(logging.Formatter):
     def filter(self, record):
         message = record.msg
         if re.findall(werkzeug_regex, message) :
-            record.msg = re.sub(
-                werkzeug_regex,
-                '',
-                message
-            )
+            record.msg = re.sub(werkzeug_regex, '', message)
         return True
 
 class JSONFormatter(logging.Formatter):
@@ -38,6 +35,22 @@ class JSONFormatter(logging.Formatter):
 
         return json.dumps(message, default=str)
 
+def get_secret_key():
+    logger = logging.getLogger("app")
+    env_file = "var/.env"
+    config_json = json.load(open(env_file)) if os.path.isfile(env_file) else {}
+    secret_key = config_json.get("FLASK_SECRET_KEY")
+    if secret_key :
+        logger.info("Succesfully extracted app's secret key from environment file")
+    else :
+        logger.warning("Could not find app's secret key from environment file")
+        secret_key = secrets.token_hex(32)
+        with open("var/.env", "w", encoding='utf-8') as f :
+            json.dump({"FLASK_SECRET_KEY": secret_key}, f)
+        logger.info("Generated app's new secret key and saved it in environment file")
+
+    return secret_key
+
 def generate_token(password):
     new_uuid = str(uuid4())
     token = jwt.encode(payload={'password': password, 'uuid': new_uuid}, key=current_app.secret_key, algorithm="HS256")
@@ -47,6 +60,7 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = request.headers.get("Authorization")
+        print(current_app.secret_key)
         if token :
             try :
                 decoded_token = jwt.decode(jwt=token, key=current_app.secret_key, algorithms=['HS256'])
