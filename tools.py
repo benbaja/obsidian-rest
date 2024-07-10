@@ -60,7 +60,6 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = request.headers.get("Authorization")
-        print(current_app.secret_key)
         if token :
             try :
                 decoded_token = jwt.decode(jwt=token, key=current_app.secret_key, algorithms=['HS256'])
@@ -71,8 +70,10 @@ def token_required(f):
             if decoded_token.get("password") == user.password and decoded_token.get("uuid") == user.uuid :
                 return f(*args, **kwargs)
             else :
+                current_app.logger.warning(f"Access to {f} with invalid token")
                 return jsonify({'message': 'Invalid token'}), 403
         else :
+            current_app.logger.warning(f"Access to {f} with no token")
             return jsonify({'message': 'Missing token'}), 403
     return decorated
 
@@ -82,7 +83,8 @@ class Swiftink() :
         self.id = None
         self.last_request = None
 
-        swiftink_api_key = os.environ.get("SWIFTINK_API_KEY")
+        user = db.session.query(Users).first()
+        swiftink_api_key = f"Bearer  {user.swiftink_api}"
         file_name = file_path.split("/")[-1]
 
         # get presigned URL from swiftink database
@@ -96,11 +98,10 @@ class Swiftink() :
         )
 
         if pres_url_request == None :
-            # log
+            current_app.logger.warning("Failed to get presigned URL from Swiftink API")
             self.last_request = "Swiftink presigned URL"
             return None
-        print(pres_url_request.text)
-        # log
+        current_app.logger.debug(f"Got file name {pres_url_request.json().get('filename')} from Swiftink presigned URL API")
         
         # upload file to presigned URL
         pres_url = pres_url_request.json()['url']
@@ -116,11 +117,10 @@ class Swiftink() :
         )
 
         if upload_request == None :
-            # log
+            current_app.logger.warning("Failed to upload file to Swiftink API")
             self.last_request = "Swiftink file upload"
             return None
-        print(upload_request.text)
-        # log
+        current_app.logger.debug(f"Got key {upload_request.json().get('Key')} from Swiftink upload API")
 
         # get transcript of file
         transcript_request = self.call_API(
@@ -140,7 +140,7 @@ class Swiftink() :
         )
 
         if transcript_request == None :
-            # log
+            current_app.logger.warning("Failed to get transcription from Swiftink API")
             self.last_request = "Swiftink get transcription"
             return None
         self.text = transcript_request.json()["text"]
@@ -170,8 +170,8 @@ class Swiftink() :
             if str(request.status_code)[0] == '2' :
                 success = True
             else :
-                # log swift API response
-                print(request.status_code)
+                current_app.logger.warning(f"{req_type} request to {api_url} (retry #{retries}) : got status {request.status_code}")
+                current_app.logger.debug(request.text)
                 time.sleep(30)
         
         if success :
