@@ -1,5 +1,5 @@
 from flask import Blueprint, current_app, request, session, jsonify
-from models import db, Note, AudioRecording, Users
+from models import db, Note, AudioRecording
 from tools import Swiftink
 import base64
 import datetime
@@ -38,7 +38,7 @@ def create():
         audio_file = base64.b64decode(audio_data)
         file_path = "var/audio_captures/" + capture_data.get("file_name")
         # create audio capture folder if it doesn't exist
-        Path("audio_captures").mkdir(parents=False, exist_ok=True)
+        Path("var/audio_captures/").mkdir(parents=False, exist_ok=True)
 
         # download audio file 
         with open(file_path,"wb") as file:
@@ -53,7 +53,7 @@ def create():
         db.session.refresh(new_audio)
 
         # try to transcript the audio file
-        transcription_result = Swiftink(file_path)#, logger)
+        transcription_result = Swiftink(file_path)
         if transcription_result.text :
             # todo : check length of note and split if > 50kb
             # add the transcript to the note database if succeeded
