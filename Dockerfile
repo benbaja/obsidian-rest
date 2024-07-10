@@ -9,4 +9,4 @@ VOLUME /obsidian-audio-capture/var
 
 RUN pip3 install -r requirements.txt
 
-CMD ["python3", "-m", "gunicorn", "-b", "0.0.0.0", "app:create_app('config.json')"]
+CMD ["python3", "-m", "gunicorn", "-b", "0.0.0.0", "-t", "180", "app:create_app('config.json')"]
