@@ -1,16 +1,20 @@
 module.exports = {
     entry: async (params, settings) => {
-        const captures = await fetch(settings["API URL"]+ "/capture").catch(async (error) => {
+        const headers = {
+            "Content-Type": "application/json",
+            "authorization": settings.token
+          }
+        const captures = await fetch(settings["API URL"]+ "/capture/", {headers: headers}).catch(async (error) => {
+            console.error(error)
             // throw error with quickAdd dialog in case of network error
-            await params.quickAddApi.infoDialog("API Error",
+            await params.quickAddApi.infoDialog("Network Error",
                 ["quickAdd could not communicate with the Obsidian Audio Capture API.",
-                "Make sure that you gave the correct API URL and key in the macro settings",
-                "Otherwise, check that the API is running and accessible."])
+                "Please check your connection, or that the API is running and accessible."])
         })
 
         if (captures.status >= 400 && captures.status < 600) {
             // throw error with quickAdd dialog in case of HTTP error
-            await params.quickAddApi.infoDialog("API Error",
+            await params.quickAddApi.infoDialog(`HTTP Error ${captures.status}`,
                 ["quickAdd could not communicate with the Obsidian Audio Capture API.",
                 "Make sure that you gave the correct API URL and key in the macro settings",
                 "Otherwise, check that the API is running and accessible."])
@@ -39,7 +43,7 @@ module.exports = {
             body: JSON.stringify({
                 captureIDs: captureIDs
             }),
-            headers: { "Content-type": "application/json; charset=UTF-8"}
+            headers: headers
         });
 
         return returnString
@@ -54,10 +58,10 @@ module.exports = {
                 defaultValue: "",
                 description: "URL of the Obsidian Audio Capture API",
             },
-            "API key": {
+            "token": {
                 type: "text",
                 defaultValue: "",
-                description: "Obsidian Audio Capture API key",
+                description: "Obsidian Audio Capture token",
             },
         }
     }
