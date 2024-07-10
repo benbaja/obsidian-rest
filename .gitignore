@@ -5,3 +5,4 @@ audio_captures/
 var/
 test.ipynb
 todo.md
+.dockerignore
