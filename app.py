@@ -30,7 +30,7 @@ def create_app(config_file):
     
     db.init_app(app)
     bootstrap = Bootstrap5(app)
-    #flask_cors.CORS(app) # authorize cross-origin AJAX for Obsidian
+    flask_cors.CORS(app) # authorize cross-origin AJAX for Obsidian
 
     app.register_blueprint(auth)
     app.register_blueprint(settings)
