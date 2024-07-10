@@ -1,4 +1,5 @@
 from flask import Flask
+from flask.logging import default_handler
 from flask_bootstrap import Bootstrap5
 from pathlib import Path
 from models import db
@@ -16,11 +17,12 @@ from views.routes import routes
 
 def create_app(config_file): 
     config_json = json.load(open(config_file))
-
+    
     instance_path = os.path.abspath(config_json["INSTANCE_PATH"])
     app = Flask(__name__, instance_path=instance_path)
 
     Path(config_json["LOGS_PATH"]).mkdir(parents=False, exist_ok=True)
+    app.logger.removeHandler(default_handler)
     logging.config.dictConfig(config_json["LOGGER_CONFIG"])
 
     app.config.from_file(config_file, load=json.load)
@@ -35,10 +37,11 @@ def create_app(config_file):
     app.register_blueprint(capture)
     app.register_blueprint(routes)
 
+    with app.app_context():
+        db.create_all()
+
     return app
 
 if __name__ == "__main__" :
     app = create_app("config.json")
-    with app.app_context():
-        db.create_all()
-    app.run()
+    app.run(host='0.0.0.0', port=8000)

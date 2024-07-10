@@ -60,14 +60,6 @@
             }
         },
         "loggers": {
-            "root": {
-                "level": "DEBUG",
-                "handlers": [
-                    "stdout",
-                    "log_file",
-                    "json_file"
-                ]
-            },
             "werkzeug": {
                 "level": "DEBUG",
                 "handlers": [
@@ -79,13 +71,24 @@
                     "werkzeug_filter"
                 ]
             },
+            "gunicorn.error": {
+                "level": "DEBUG",
+                "handlers": [
+                    "stdout",
+                    "log_file",
+                    "json_file"
+                ],
+                "propagate": false,
+                "qualname": "gunicorn.error"
+            },
             "app": {
                 "level": "DEBUG",
                 "handlers": [
                     "stdout",
                     "log_file",
                     "json_file"
-                ]
+                ],
+                "propagate": false
             }
         }
     }
