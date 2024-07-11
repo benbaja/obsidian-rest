@@ -1,6 +1,7 @@
 from flask import Blueprint, current_app, request, session, jsonify
 from models import db, Note, AudioRecording
 from tools import Swiftink
+import json
 import base64
 import datetime
 from pathlib import Path
@@ -12,8 +13,10 @@ capture = Blueprint('capture', __name__, url_prefix='/capture')
 @token_required
 def create():
     request_json = request.json
-    capture_type = request_json.get("capture_type")
-    capture_data = jsonify(request.json.get("data"))
+    if type(request.json.get("data")) == str :
+        capture_data = json.loads(request.json.get("data"))
+    else :
+        capture_type = request_json.get("capture_type")
     if capture_type == "note" :
         # check if sent note is a todo, fallback to false
         todo = request_json.get("todo") or False
