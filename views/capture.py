@@ -13,7 +13,7 @@ capture = Blueprint('capture', __name__, url_prefix='/capture')
 def create():
     request_json = request.json
     capture_type = request_json.get("capture_type")
-    capture_data = request.json.get("data")
+    capture_data = jsonify(request.json.get("data"))
     if capture_type == "note" :
         # check if sent note is a todo, fallback to false
         todo = request_json.get("todo") or False
@@ -28,7 +28,7 @@ def create():
         # return new note id
         new_note = Note.query.order_by(Note.note_id.desc()).first()
 
-        return {"new_note_id": new_note.note_id}
+        return jsonify({"new_note_id": new_note.note_id})
 
     elif capture_type == "audio" :
         if "," in capture_data.get("audio") :
@@ -69,7 +69,7 @@ def create():
             db.session.commit()
             # return id of note if succeeded
             new_note = Note.query.order_by(Note.note_id.desc()).first()
-            return {"new_note_id": new_note.note_id}
+            return jsonify({"new_note_id": new_note.note_id})
 
         else :
             # return id of audio
@@ -85,7 +85,7 @@ def update():
     db.session.query(Note).filter(Note.note_id.in_(to_update_list)).update({'fetched': True})
     db.session.commit()
 
-    return to_update_list
+    return jsonify(to_update_list)
 
 @capture.route("/", methods = ['GET'])
 @token_required
@@ -101,7 +101,7 @@ def fetch():
             "capture_id": note.note_id
         } for note in all_captures
     ]
-    return all_captures_json
+    return jsonify(all_captures_json)
 
 @capture.route("/<id>", methods = ['GET'])
 @token_required
@@ -114,4 +114,4 @@ def capture_id(id):
         "following": note.following,
         "audio_id": note.audio_id
     }
-    return capture_json
+    return jsonify(capture_json)
