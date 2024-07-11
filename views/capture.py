@@ -13,10 +13,11 @@ capture = Blueprint('capture', __name__, url_prefix='/capture')
 @token_required
 def create():
     request_json = request.json
+    capture_type = request_json.get("capture_type")
     if type(request.json.get("data")) == str :
         capture_data = json.loads(request.json.get("data"))
     else :
-        capture_type = request_json.get("capture_type")
+        capture_data = request.json.get("data")
     if capture_type == "note" :
         # check if sent note is a todo, fallback to false
         todo = request_json.get("todo") or False
