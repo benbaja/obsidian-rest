@@ -32,7 +32,7 @@ def create():
         # return new note id
         new_note = Note.query.order_by(Note.note_id.desc()).first()
 
-        return jsonify({"new_note_id": new_note.note_id})
+        return jsonify({"message": "Capture successful", "new_note_id": new_note.note_id})
 
     elif capture_type == "audio" :
         if "," in capture_data.get("audio") :
@@ -73,13 +73,13 @@ def create():
             db.session.commit()
             # return id of note if succeeded
             new_note = Note.query.order_by(Note.note_id.desc()).first()
-            return jsonify({"new_note_id": new_note.note_id})
+            return jsonify({"message": "Capture successful", "new_note_id": new_note.note_id})
 
         else :
             # return id of audio
-            return jsonify({'message': 'Server error', "new_audio_id": new_audio.audio_id}), 500
+            return jsonify({'message': 'Transcription server error', "new_audio_id": new_audio.audio_id}), 500
 
-    return "Invalid payload ", 400
+    return jsonify({'message': 'Invalid payload'})
 
 @capture.route("/update", methods = ['POST'])
 @token_required
