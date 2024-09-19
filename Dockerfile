@@ -15,4 +15,4 @@ RUN chmod +x start.sh
 RUN pip3 install -r requirements.txt
 
 CMD ./start.sh
-#CMD ["python3", "-m", "gunicorn", "-b", "0.0.0.0", "-t", "180", "app:create_app('config.json')"]
+#CMD ["python3", "-m", "gunicorn", "-b", "0.0.0.0:8000", "-t", "180", "app:create_app('config.json')"]
