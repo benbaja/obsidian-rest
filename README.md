@@ -16,7 +16,6 @@
   <p align="center">
     Self-hostable API for quick Obsidian captures
     <br />
-    ·
     <a href="https://github.com/benbaja/obsidian-rest/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
     <a href="https://github.com/benbaja/obsidian-rest/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
@@ -51,6 +50,7 @@
 ## About The Project
 
 This project was developped as an API middleware to quickly capture notes or audio-notes to a self-hosted REST API for later upload and organisation on Obsidian.
+
 It grew out of frustration with the mobile Obsidian app that makes quick capture mostly impossible in case of inspiration burst
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -89,42 +89,66 @@ Make sure to map the X folder to a persistent space in your disk to keep the dat
 ### POST /capture/create
 
 Payload :
+
 `capture_type: note | audio`
+
 for text notes
+
 `todo: boolean` (optional) formats the captured note as a to-do item
+
 `text: string` text of the note to capture
+
 for audio
+
 `audio: base64` base64 encoding of the audio file
+
 `file_name: string` name of the audio file
 
 Returns : `new_note_id` or `new_audio_id`
 
+
 ### POST /capture/update
 
 Payload :
+
 `captureIDs: string[]` note IDs to mark as "fetched" on the database
 
 Returns : `captureIDs`
 
+
 ### GET /capture/
 
 Returns for each capture :
+
 `text: string`
+
 `date_added: date`
+
 `todo: boolean`
+
 `following: note_id` (optional)
+
 `audio_id: audio_id` (optional)
+
 `capture_id: note_id`
+
 
 ### GET /capture/<note_id>
 
 Returns :
+
 `text: string`
+
 `date_added: date`
+
 `todo: boolean`
+
 `following: note_id` (optional)
+
 `audio_id: audio_id` (optional)
+
 `capture_id: note_id`
+
 
 ### iOS Shortcut
 
